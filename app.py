@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 from datetime import datetime
 import random
 from collections import defaultdict
@@ -39,6 +39,22 @@ def get_daily_usage():
         "2025-05-13": 90,
         "2025-05-14": last_data["water_usage"]
     })
+
+@app.route("/update_data", methods=["POST"])
+def update_data():
+    global last_data
+    data = request.get_json()
+    if not data:
+        return "No JSON received", 400
+    
+    try:
+        last_data["water_level"] = int(data["w"])
+        last_data["water_usage"] += int(data["u"])
+        last_data["status_keran"] = data["s"]
+        last_data["timestamp"] = datetime.now().strftime('%H:%M:%S')
+        return "", 204  # No Content (berhasil tanpa body)
+    except Exception as e:
+        return str(e), 400
 
 if __name__ == "__main__":
     app.run(debug=True)
