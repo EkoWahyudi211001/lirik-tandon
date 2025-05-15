@@ -21,12 +21,6 @@ def index():
 
 @app.route("/get_data")
 def get_data():
-    global last_data
-    # Simulasi update
-    last_data["water_level"] = random.randint(40, 90)
-    last_data["water_usage"] += random.randint(1, 5)
-    last_data["timestamp"] = datetime.now().strftime('%H:%M:%S')
-    last_data["status_keran"] = "ON" if random.choice([True, False]) else "OFF"
     return jsonify(last_data)
 
 @app.route("/get_daily_usage")
