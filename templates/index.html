@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Lirik Tandon</title>
+    <link href = "https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg: #f0f4f8;
+            --card-bg: #ffffff;
+            --text: #333333;
+            --primary: #2196f3;
+            --accent: #66bb6a;
+            --circle-on: green;
+            --circle-off: red;
+        }
+
+        html[data-theme="dark"] {
+            --bg: #1e1e1e;
+            --card-bg: #2c2c2c;
+            --text: #ffffff;
+        }
+
+        body, .card, .hero, h1, h2 {
+          transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        html, body {
+            overflow-x : hidden;
+            width: 100%;
+            box-sizing: border-box;
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0;
+            background-image: url('data:image/svg+xml;utf8,<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="dots" patternUnits="userSpaceOnUse" width="40" height="40"><circle cx="2" cy="2" r="2" fill="%23cccccc" /></pattern></defs><rect width="100%" height="100%" fill="url(%23dots)" /></svg>');
+        }
+
+        .hero{
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            padding: 60px 20px 40px;
+            text-align: center;
+            border-bottom-left-radius: 40px;
+            border-bottom-right-radius: 40px;
+        }
+
+        .hero h1 {
+            margin: 0;
+            font-size: 2.2rem;
+        }
+
+        .hero p {
+            margin: 10px 0 0;
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .toggle-btn{
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: 2px solid white;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            margin-top: -30px;
+            padding: 0 20px 40px;
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .monitoring {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 20px;
+            flex: 1 1 30%;
+            min-width: 0;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .label {
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .value {
+            font-size: 1.5em;
+        }
+
+        .status-circle {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            margin-left: 8px;
+        }
+
+        .canvas {
+            margin-top: 20px;
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        footer {
+            margin-top: 50px;
+            font-size: 0.8em;
+            color: var(--text);
+            opacity: 0.7;
+            text-align: center;
+        }
+
+        *, *::before, *::after {
+          box-sizing: border-box;
+        }
+
+        @media (max-width: 600px) {
+            .hero h1 {
+                font-size: 1.6rem;
+            }
+            .hero p {
+                font-size: 0.9rem;
+            }
+            .container {
+                padding: 0 10px 30px;
+            }
+            .monitoring {
+                flex-direction: column;
+            }
+        }
+
+        @media (min-width: 768px) {
+            #water-chart, #activity-chart {
+              max-width: 600px;
+              /*240*/
+              height: 300px !important;
+            }
+        }
+
+        .chartjs-render-monitor {
+            font-size: 14px !important; /* Perbesar tulisan label di chart */
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <button class="toggle-btn" onclick="toggleTheme()" id="toggleIcon">🌞</button>
+        <h1>Lirik Tandon</h1>
+        <p>Smart Water Monitoring Dashboard</p>
+    </div>
+
+    <div class="container">
+        <div class="monitoring">
+            <div class="card">
+                <div class="label">Water Level</div>
+                <div class="value"><span id="water-level">--</span>%</div>
+            </div>
+
+            <div class="card">
+                <div class="label">Water Usage</div>
+                <div class="value"><span id="water-usage">--</span>L</div>
+            </div>
+
+            <div class="card">
+                <div class="label">Valve Status</div>
+                <div class="value"><span id="valve-status">--</span> <span id="valve-indicator" class="status-circle" style="background:gray;"></span></div>
+            </div>
+        </div>
+    </div>
+
+    <div style="margin-top: -20px; text-align:center; font-size:0.9em; opacity: 0.6;">
+        Last Update: <span id="last-update">--</span>
+    </div>
+
+
+    <h2>Live Water Monitoring</h2>
+    <canvas id="water-chart" height="200"></canvas>
+
+    <h2>Daily Valve On Activity</h2>
+    <canvas id="activity-chart" height="300"></canvas>
+
+    <footer>
+        Created by <strong>Eko Wahyudi</strong> - 2025
+    </footer>
+
+
+    <script>
+        Chart.defaults.font.size = 14;
+        Chart.defaults.plugins.tooltip.backgroundColor = '#333';
+        Chart.defaults.plugins.tooltip.titleColor = '#fff';
+        Chart.defaults.plugins.tooltip.bodyColor = '#eee';
+        Chart.defaults.plugins.tooltip.borderColor = '#2196f3';
+        Chart.defaults.plugins.tooltip.borderWidth = 1;
+        Chart.defaults.animation = {
+            duration: 1500,
+            easing: 'easeOutQuart'
+        };
+
+        const levelSpan = document.getElementById('water-level');
+        const usageSpan = document.getElementById('water-usage');
+        const statusSpan = document.getElementById('valve-status');
+        const indicator = document.getElementById('valve-indicator');
+
+        const waterCtx = document.getElementById('water-chart').getContext('2d');
+        const waterChart = new Chart(waterCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Water Level (%)', 'Usage (L)'],
+                datasets: [{
+                    label: '',
+                    data: [0,0],
+                    backgroundColor: ['#00bcd4', '#4caf50'],
+                }]
+            },
+            options: {
+                plugins: { legend: { display: false } },
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                animation: { duration: 1000, easing: 'easeInOutQuart' }
+            }
+        });
+
+        const activityCtx = document.getElementById('activity-chart').getContext('2d');
+        const activityChart = new Chart(activityCtx, {
+          type: 'line',
+          data: { labels: [], datasets: [{ label: '', data: [], backgroundColor: 'rgba(0,188,212,0.2)', borderColor: '#00bcd4', tension: 0.3 }] },
+          options: {
+              plugins: { legend: { display: false } },
+              responsive: true,
+              scales: {
+                  x: {
+                      ticks: {
+                          maxRotation: 45,
+                          minRotation: 45,
+                          autoSkip: true,
+                          maxTicksLimit: 7,
+                          color: 'var(--text)'
+                      },
+                      grid: {
+                          display: false
+                      }
+                  },
+                  y: {
+                      beginAtZero: true,
+                      ticks: { stepSize: 1 }
+                  }
+              },
+              animation: {
+                  duration: 1000,
+                  easing: 'easeInOutQuart'
+              }
+          }
+        });
+
+
+        function fetchData() {
+            fetch('/get_data')
+                .then(res => res.json())
+                .then(data => {
+                    levelSpan.textContent = data.water_level;
+                    usageSpan.textContent = data.water_usage;
+                    waterChart.data.datasets[0].data = [data.water_level, data.water_usage];
+                    waterChart.update();
+
+                    const valve = data.status_keran === 'ON' ? 'ON' : 'OFF';
+                    statusSpan.textContent = valve;
+                    indicator.style.background = valve === 'ON' ? 'green' : 'red';
+
+                    // Tambahan waktu update
+                    const time = data.timestamp || new Date().toLocaleTimeString();
+                    document.getElementById('last-update').textContent = time;
+                });
+        }
+
+
+        function fetchActivity(){
+            fetch('/get_daily_usage')
+                .then(res => res.json())
+                .then(data => {
+                    const dates = Object.keys(data).sort();
+                    const values = dates.map(date => data[date]);
+                    activityChart.data.labels = dates;
+                    activityChart.data.datasets[0].data = values;
+                    activityChart.update();
+                });
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+
+            const toggleIcon = document.getElementById('toggleIcon');
+            toggleIcon.textContent = next === 'dark' ? '🌙' : '🌞';
+        }
+
+
+        fetchData();
+        fetchActivity();
+        setInterval(fetchData, 5000);
+        setInterval(fetchActivity, 60000); // Update grafik aktivitas tiap 1 menit
+    </script>
+</body>
+</html>
