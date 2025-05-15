@@ -37,18 +37,20 @@ def get_daily_usage():
 @app.route("/update_data", methods=["POST"])
 def update_data():
     global last_data
+
     data = request.get_json()
     if not data:
         return "No JSON received", 400
-    
+
     try:
         last_data["water_level"] = int(data["w"])
-        last_data["water_usage"] += int(data["u"])
+        last_data["water_usage"] = int(data["u"])  # GANTI += JADI =
         last_data["status_keran"] = data["s"]
         last_data["timestamp"] = datetime.now().strftime('%H:%M:%S')
-        return "", 204  # No Content (berhasil tanpa body)
+        return "", 204
     except Exception as e:
         return str(e), 400
+
 
 if __name__ == "__main__":
     app.run(debug=True)
